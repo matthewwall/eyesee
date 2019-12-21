@@ -1,0 +1,28 @@
+# configuration for eyesee image/video collection
+
+# Options for getimg
+GETIMG_HOST=192.168.0.20
+GETIMG_CTYPE=hikvision
+GETIMG_USER=guest
+GETIMG_PASS=
+
+# Options for mkvid
+MKVID_MAXAGE=5400
+
+# Options for the reaper
+REAPER_MAXAGE=14
+
+# Camera-specific options
+# Use the camera identifier to distinguish between cameras.
+# The identifier is typically the IP address or hostname.
+
+[192.168.0.20]
+GETIMG_TYPE=dahua
+
+[192.168.0.21]
+GETIMG_TYPE=dlink
+GETIMG_DAYONLY=1
+
+[192.168.0.22]
+GETIMG_TYPE=foscam
+

@@ -1,0 +1,296 @@
+<html>
+<head>
+  <title>images</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="jquery-ui.css">
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="jquery-ui.min.js"></script>
+  <script type="text/javascript" src="bootstrap.min.js"></script>
+  <script>
+$( function() {
+  $('#datepicker').datepicker();
+});
+function populate_thumbnails(id) {
+  var e = document.getElementById(id);
+  if(e) {
+    for(var i=0; i<INFO.images.length; i++) {
+    }
+  }
+}
+  </script>
+  <style>
+.col {
+    float: left;
+}
+img {
+    width: 80px;
+    padding: 1px;
+}
+.btn {
+    height: 34px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 18px;
+    padding: 2px 12px;
+}
+.btn-default {
+    color: #333;
+    background-color: #ddd;
+    border-color: #666;
+}
+.btn-default:focus,
+.btn-default.focus {
+    color: #333;
+    background-color: #ccc;
+    border-color: #666;
+}
+.btn-default:hover {
+    color: #333;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-default.disabled,
+.btn-default[disabled],
+fieldset[disabled] .btn-default,
+.btn-default.disabled:hover,
+.btn-default[disabled]:hover,
+fieldset[disabled] .btn-default:hover,
+.btn-default.disabled:focus,
+.btn-default[disabled]:focus,
+fieldset[disabled] .btn-default:focus,
+.btn-default.disabled.focus,
+.btn-default[disabled].focus,
+fieldset[disabled] .btn-default.focus,
+.btn-default.disabled:active,
+.btn-default[disabled]:active,
+fieldset[disabled] .btn-default:active,
+.btn-default.disabled.active,
+.btn-default[disabled].active,
+fieldset[disabled] .btn-default.active {
+    background-color: #ddd;
+    border-color: #666;
+}
+  </style>
+</head>
+<body>
+
+<p>
+<a class="btn btn-default">&lt;</a>
+<input type="text" id="datepicker">
+<a class="btn btn-default">&gt;</a>
+</p>
+
+<div id='thumbnail-selector'>
+<div class='col'><a class="btn btn-default">&lt;</a><br/>
+00<br/>
+05<br/>
+10<br/>
+15<br/>
+20<br/>
+25<br/>
+30<br/>
+35<br/>
+40<br/>
+45<br/>
+50<br/>
+55<br/>
+</div>
+<div class='col'>
+<span class='hour'>05:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817050001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817050501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817051001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817051501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817052001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817052501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817053001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817053501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817054002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817054502-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817055001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817055501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>06:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817060001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817060501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817061001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817061501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817062002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817062502-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817063001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817063501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817064001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817064501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817065001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817065501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>07:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817070002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817070501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817071001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817071501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817072001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817072501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817073001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817073501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817074001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817074501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817075001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817075501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>08:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817080002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817080501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817081001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817081501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817082001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817082501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817083001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817083501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817084001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817084501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817085001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817085502-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>09:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817090001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817090501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817091001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817091501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817092001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817092501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817093001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817093501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817094001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817094501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817095001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817095501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>10:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817100001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817100501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817101001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817101501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817102001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817102501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817103001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817103501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817104001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817104501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817105001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817105501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>11:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817110001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817110501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817111001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817111501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817112001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817112501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817113001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817113501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817114001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817114501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817115001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817115501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>12:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817120002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817120501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817121001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817121501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817122001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817122501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817123001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817123501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817124001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817124501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817125001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817125501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>13:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817130001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817130501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817131001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817131501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817132001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817132501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817133001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817133501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817134001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817134501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817135002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817135501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>14:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817140001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817140501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817141001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817141501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817142001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817142501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817143001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817143502-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817144002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817144501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817145001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817145501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>15:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817150001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817150501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817151001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817151501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817152001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817152501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817153001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817153501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817154001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817154501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817155001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817155501-tn.jpg" /><br/>
+</div>
+<div class='col'>
+<span class='hour'>16:00</span><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817160002-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817160501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817161001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817161502-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817162001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817162501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817163001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817163501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817164001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817164501-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817165001-tn.jpg" /><br/>
+<img src="/admin/img/192.168.12.32/20160817/20160817165501-tn.jpg" /><br/>
+</div>
+<div><a class="btn btn-default">&gt;</a><br/>
+00<br/>
+05<br/>
+10<br/>
+15<br/>
+20<br/>
+25<br/>
+30<br/>
+35<br/>
+40<br/>
+45<br/>
+50<br/>
+55<br/>
+</div>
+</div>
+
+</body>
+</html>

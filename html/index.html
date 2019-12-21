@@ -1,0 +1,461 @@
+<html>
+<!-- Copyright 2013-2017 Matthew Wall -->
+<!-- Distributed under the terms of the GPLv3 -->
+<head>
+  <title>image/video browser</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="highslide/highslide.css">
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/echo.min.js"></script>
+  <script type="text/javascript" src="highslide/highslide-with-gallery.js"></script>
+  <script type="text/javascript" src="eyesee.js"></script>
+  <script type="text/javascript">
+//<![CDATA[
+hs.registerOverlay({
+  html: '<div class="closebutton" onclick="return hs.close(this)" title="Close"></div>',
+  position: 'top right',
+  fade: 2 // fading the translucent overlay looks bad in IE
+});
+hs.showCredits = false;
+hs.graphicsDir = 'highslide/graphics/';
+hs.wrapperClassName = 'borderless';
+hs.outlineType = 'rounded-white';
+hs.addSlideshow({
+  slideshowGroup: 'group1',
+  interval: 500,
+  repeat: false,
+  useControls: true,
+  fixedControls: 'fit',
+  overlayOptions: {
+    opacity: 0.75,
+    position: 'bottom center',
+    offsetX: 0,
+    offsetY: -10,
+    hideOnMouseOut: true
+  },
+/*
+  thumbstrip: {
+    mode: 'horizontal',
+    position: 'bottom center',
+    relativeTo: 'viewport'
+  }
+*/
+});
+//]]>
+var config = {
+  slideshowGroup: 'group1',
+  transitions: ['expand', 'crossfade']
+};
+  </script>
+  <script>
+var now = new Date();
+var IVB_CAMERA_LIST = [];
+var IVB_SERVER_URL = '/eyesee/cgi-bin/info';
+var IVB_CAMERA;
+var IVB_TS = now.getTime();
+var IVB_MAX_AGE = 1;
+var IVB_TYPE = 'img';
+var newest_first = 0;
+
+function get_cfg(cfg, label, dflt) {
+    return cfg[label] !== undefined ? cfg[label] : dflt;
+}
+
+function getcgivars() {
+  var vars = {};
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+    function(m, key, value) {
+      vars[key] = value;
+    });
+  return vars;
+}
+
+function get_defaults(CFG) {
+  // load from configuration file, if available
+  if (CFG.server_url) IVB_SERVER_URL = CFG.server_url;
+  if (CFG.cameras) IVB_CAMERA_LIST = CFG.cameras;
+  if (CFG.max_age) IVB_MAX_AGE = CFG.max_age;
+  if (CFG.type) IVB_TYPE = CFG.type;
+  if (CFG.camera) IVB_CAMERA = CFG.camera;
+  if (CFG.ts) IVB_TS = CFG.ts;
+  // override with any cgi arguments
+  var v = getcgivars();
+  if (v['max_age']) IVB_MAX_AGE = v['max_age'];
+  if (v['type']) IVB_TYPE = v['type'];
+  if (v['camera']) {
+    IVB_CAMERA = v['camera'];
+    IVB_CAMERA_LIST = [{'camera_label':'camera', 'camera_id':IVB_CAMERA}];
+  }
+  if (v['ts']) IVB_TS = v['ts'];
+}
+
+function pad(x, sz) {
+  var s = x + "";
+  while(s.length < sz) {
+    s = "0" + s;
+  }
+  return s;
+}
+
+function populate_thumbnails(id, data, type) {
+  if (type === undefined) type = 'img';
+  var e = document.getElementById(id);
+  if(e) {
+    // remove any existing thumbnails
+    if(e.lastChild) {
+      e.removeChild(e.lastChild);
+    }
+    // put the thumbnails in order based on their timestamps
+    data.assets.sort(function(a, b) {
+      if(newest_first)
+        return b.ts - a.ts;
+      return a.ts - b.ts;
+    });
+    var tbl = document.createElement('table');
+    tbl.className = "table";
+    var tbdy = document.createElement('tbody');
+    var imgstr = '';
+    var lastday = -1;
+    for(var i=0; i<data.assets.length; i++) {
+      var icn;
+      if(data.assets[i].thumbnail) {
+        icn = '<img src="blank.gif" data-echo="' + data.assets[i].thumbnail + '"/>';
+      } else if(type == 'vid') {
+        icn = '<span class="glyphicon glyphicon-facetime-video placeholder"></span>';
+      } else {
+        icn = '<span class="glyphicon glyphicon-picture placeholder"></span>';
+      }
+      imgstr += '<a href="' + data.assets[i].source + '" class="highslide" onclick="return hs.expand(this, config)">' + icn + '</a>';
+      var d = new Date(0);
+      d.setTime(data.assets[i].ts * 1000);
+      var day = d.getDate();
+      var hour = d.getHours();
+      var nexthour = -1;
+      if(i+1 < data.assets.length) {
+        d = new Date(0);
+        d.setTime(data.assets[i+1].ts * 1000);        
+        nexthour = d.getHours();
+      }
+      if(hour != nexthour) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        var dstr = '';
+        if(day != lastday) {
+          tr.className = 'bg-primary';
+          td.className = 'date';
+          td.innerHTML = d.toDateString();
+          td.setAttribute('colspan', 2);
+          tr.appendChild(td);
+          tbl.appendChild(tr);
+          tr = document.createElement('tr');
+          td = document.createElement('td');
+          lastday = day;
+        }
+        td.className = 'time';
+        td.innerHTML = pad(hour, 2) + ':00';
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.className = 'thumbnails';
+        td.innerHTML = imgstr;
+        tr.appendChild(td);
+        tbl.appendChild(tr);
+        imgstr = '';
+      }
+    }
+    var div = document.createElement('div');
+    div.appendChild(tbl);
+    e.appendChild(div);
+    echo.init({
+      offsetBottom: 500
+/*
+      callback: function(element, op) {
+        if(op === 'load') {
+          $('#loading').hide();
+        } else {
+          $('#loading').show();
+        }
+      }
+*/
+    });
+  }
+}
+
+function configure_camera_chooser(id, camlist) {
+  if(! camlist) return;
+  var e = document.getElementById(id);
+  if(e) {
+    var s = document.createElement('select');
+    s.id = 'camera-chooser';
+    s.className = 'form-control';
+    e.appendChild(s);
+    var o = document.createElement('option');
+    o.text = 'Choose a camera';
+    s.appendChild(o);
+    for(var i=0; i<camlist.length; i++) {
+      var o = document.createElement('option');
+      o.value = camlist[i].camera_id;
+      if(camlist[i].camera_label) {
+        o.text = camlist[i].camera_label;
+      } else {
+        o.text = camlist[i].camera_id;
+      }
+      s.appendChild(o);
+    }
+    if(camlist.length == 1) {
+      s.style.visibility = 'hidden';
+      s.selectedIndex = 1;
+    }
+  }
+}
+
+function configure_type_chooser(id) {
+  var e = document.getElementById(id);
+  if(e) {
+    var s = document.createElement('select');
+    s.id = 'type-chooser';
+    s.className = 'form-control';
+    e.appendChild(s);
+    var o = document.createElement('option');
+    o.text = 'Image';
+    o.value = 'img';
+    s.appendChild(o);
+    o = document.createElement('option');
+    o.text = 'Video';
+    o.value = 'vid';
+    s.appendChild(o);
+  }
+}
+
+function change_date(doff, moff) {
+  var d = $('#datepicker').datepicker('getDate');
+  if (!d) {
+    d = new Date();
+  }
+  var ts = d.getTime() + doff*3600*24*1000 + moff*3600*24*30*1000;
+  d.setTime(ts);
+  $('#datepicker').datepicker('setDate', d);
+}
+
+function get_data(camera, end_ts, max_age, type) {
+  if (max_age === undefined) {
+    max_age = IVB_MAX_AGE;
+  }
+  if (camera === undefined) {
+    var e = document.getElementById('camera-chooser');
+    if(e) {
+      camera = e.options[e.selectedIndex].value;
+    }
+  }
+  if (end_ts === undefined) {
+    var d = $('#datepicker').datepicker('getDate');
+    if(! d) {
+      d = new Date();
+      end_ts = d.getTime();
+    } else {
+      d.setHours(23,59,59,999); // end of the selected day
+      end_ts = d.getTime();
+    }
+  } else {
+    var d = new Date();
+    d.setTime(end_ts);
+    $('#datepicker').datepicker('setDate', d);
+  }
+  if (type === undefined) {
+    var e = document.getElementById('type-chooser');
+    if (e) {
+      type = e.options[e.selectedIndex].value;
+    }
+  } else {
+    type = IVB_TYPE;
+    $('#type-chooser').val(type);
+  }
+  var start_ts = end_ts - max_age*24*3600*1000;
+  var url = IVB_SERVER_URL + '?start=' + start_ts + '&end=' + end_ts + '&camera=' + camera + '&type=' + type;
+  $.ajax({
+    url: url,
+    method: 'GET',
+    success: function(result) {
+      populate_thumbnails('thumbnail-table-holder', result, type);
+    },
+    failure: function(e) {
+      console.log("failure for url " + url);
+      console.log(e);
+    },
+    beforeSend: function() {
+      $('#loading').show();
+    },
+    complete: function() {
+      $('#loading').hide();
+    }
+  });
+}
+
+$( function() {
+  get_defaults(CFG);
+  $('#datepicker').datepicker({onClose: function(d) { get_data(); }});
+  $('#prev-month').click(function() { change_date(0, -1); get_data(); });
+  $('#prev-day').click(function() { change_date(-1, 0); get_data(); });
+  $('#next-day').click(function() { change_date(1, 0); get_data(); });
+  $('#next-month').click(function() { change_date(0, 1); get_data(); });
+  configure_type_chooser('type-chooser-holder');
+  $('#type-chooser').change(function() { get_data(); });
+  configure_camera_chooser('camera-chooser-holder', IVB_CAMERA_LIST);
+  $('#camera-chooser').change(function() { get_data(); });
+  get_data(IVB_CAMERA, IVB_TS, IVB_MAX_AGE, IVB_TYPE);
+});
+  </script>
+  <style>
+img {
+    height: 50px;
+    padding: 1px;
+}
+.placeholder {
+    padding: 12px;
+    margin: 10px;
+    border: 1px solid #ddd;
+}
+#loading {
+    margin-top: 5px;
+}
+#loading img {
+    height: 16px;
+    margin-right: 10px;
+}
+#datepicker {
+    width: 100px;
+    display: inline;
+}
+#camera-chooser-holder {
+    float: right;
+    margin-right: 10px;
+}
+#type-chooser-holder {
+    float: right;
+    margin-right: 5px;
+}
+table {
+/*    table-layout: fixed; */
+}
+.thumbnails {
+    width: 95%;
+}
+.time {
+    width: 5%;
+    text-align: right;
+    padding-right: 10px;
+    padding-left: 5px;
+    vertical-align: top;
+}
+.date {
+    padding-left: 5px;
+}
+.btn {
+    height: 34px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 18px;
+    padding: 2px 12px;
+}
+.btn-default {
+    color: #333;
+    background-color: #ddd;
+    border-color: #666;
+}
+.btn-default:focus,
+.btn-default.focus {
+    color: #333;
+    background-color: #ccc;
+    border-color: #666;
+}
+.btn-default:hover {
+    color: #333;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-default.disabled,
+.btn-default[disabled],
+fieldset[disabled] .btn-default,
+.btn-default.disabled:hover,
+.btn-default[disabled]:hover,
+fieldset[disabled] .btn-default:hover,
+.btn-default.disabled:focus,
+.btn-default[disabled]:focus,
+fieldset[disabled] .btn-default:focus,
+.btn-default.disabled.focus,
+.btn-default[disabled].focus,
+fieldset[disabled] .btn-default.focus,
+.btn-default.disabled:active,
+.btn-default[disabled]:active,
+fieldset[disabled] .btn-default:active,
+.btn-default.disabled.active,
+.btn-default[disabled].active,
+fieldset[disabled] .btn-default.active {
+    background-color: #ddd;
+    border-color: #666;
+}
+/* fix navbar at top of screen */
+.navbar-default {
+  position: fixed;
+  width: 100%;
+}
+/* leave space for navbar */
+.container-fluid {
+  padding-top: 60px;
+}
+.navbar-form {
+  border: 0;
+  padding-top: 0px;
+}
+@media (max-width: 768px) {
+    .btn {
+        margin-bottom: 3px;
+    }
+    .container-fluid {
+        padding-top: 100px;
+    }
+}
+.highslide img {
+  border: 0px;
+}
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+  <div class="navbar-form">
+    <div class="navbar-left">
+      <button id='prev-month' type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-backward"></span>
+      </button>
+      <button id='prev-day' type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-triangle-left"></span>
+      </button>
+      <input type="text" class="form-control" id="datepicker">
+      <button id='next-day' type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-triangle-right"></span>
+      </button>
+      <button id='next-month' type="submit" class="btn btn-default">
+        <span class="glyphicon glyphicon-forward"></span>
+      </button>
+    </div>
+    <div id='loading' class="navbar-text" style="display: none">
+      <img src='loading.gif'/><span>Loading...</span>
+    </div>
+    <div class="navbar-right">
+      <div id='camera-chooser-holder'></div>
+      <div id='type-chooser-holder'></div>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div id='thumbnail-table-holder'></div>
+</div>
+
+</body>
+</html>

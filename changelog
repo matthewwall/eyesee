@@ -1,0 +1,15 @@
+0.11 01dec19
+* explicit dereference to keep modern perl happy
+
+0.10 21sep17
+* added use-digest option for getimg to deal with new dahua firmware
+
+0.9 16jul17
+* refactor shared code into eyesee.pl
+* implement overrides to facilitate single configuration file
+
+0.8 21aug16
+* separate cfg file for configuration
+* info cgi for img and vid source and thumbnail data
+* thumbnail browser in index.html with bootstrap/responsive layout
+* datepicker in the thumbnail browser

@@ -1,0 +1,11 @@
+# capture images every 5 minutes - needed only if not running getimg as daemon
+#*/5 * * * * eyesee /opt/eyesee/bin/getimg.pl --config /etc/eyesee/eyesee.cfg >> /var/log/eyesee/getimg.log 2>&1
+
+# generate timelapse video once per hour
+#1 */2 * * * eyesee /opt/eyesee/bin/mkvid.pl --config /etc/eyesee/eyesee.cfg >> /var/log/eyesee/mkvid.log 2>&1
+
+# attempt to push a thumbnail every 5 minutes
+#*/5 * * * * eyesee /opt/eyesee/bin/xfrimg.pl --config /etc/eyesee/eyesee.cfg >> /var/log/eyesee/xfrimg.log 2>&1
+
+# delete old images and videos
+45 23 * * * eyesee /opt/eyesee/bin/reaper.pl --config /etc/eyesee/eyesee.cfg >> /var/log/eyesee/reaper.log 2>&1

@@ -1,0 +1,385 @@
+<html>
+<head>
+  <title>images</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="jquery-ui.css">
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="jquery-ui.min.js"></script>
+  <script type="text/javascript" src="bootstrap.min.js"></script>
+  <script>
+$( function() {
+  $('#datepicker').datepicker();
+});
+  </script>
+  <style>
+img {
+    width: 80px;
+    padding: 1px;
+}
+.btn {
+    height: 34px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 18px;
+    padding: 2px 12px;
+}
+.btn-default {
+    color: #333;
+    background-color: #ddd;
+    border-color: #666;
+}
+.btn-default:focus,
+.btn-default.focus {
+    color: #333;
+    background-color: #ccc;
+    border-color: #666;
+}
+.btn-default:hover {
+    color: #333;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-default.disabled,
+.btn-default[disabled],
+fieldset[disabled] .btn-default,
+.btn-default.disabled:hover,
+.btn-default[disabled]:hover,
+fieldset[disabled] .btn-default:hover,
+.btn-default.disabled:focus,
+.btn-default[disabled]:focus,
+fieldset[disabled] .btn-default:focus,
+.btn-default.disabled.focus,
+.btn-default[disabled].focus,
+fieldset[disabled] .btn-default.focus,
+.btn-default.disabled:active,
+.btn-default[disabled]:active,
+fieldset[disabled] .btn-default:active,
+.btn-default.disabled.active,
+.btn-default[disabled].active,
+fieldset[disabled] .btn-default.active {
+    background-color: #ddd;
+    border-color: #666;
+}
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header navbar-right">
+    </div>
+    <div class="navbar-form navbar-left">
+      <button type="submit" class="btn btn-default">&lt;</button>
+      <input type="text" class="form-control" id="datepicker">
+      <button type="submit" class="btn btn-default">&gt;</button>
+    </div>
+  </div>
+</nav>
+
+<script>
+function populate_thumbnails(id, data) {
+  var e = document.getElementById(id);
+  if(e) {
+    var tbl = document.createElement('table');
+    var tbdy = document.createElement('tbody');
+    var lasthour = get_hour(data.images[0].ts);
+    var imgstr = '';
+    for(var i=0; i<data.images.length; i++) {
+      imgstr += '<img src="' + data.images[i].thumbnail + '"/>';
+      var hour = get_hour(data.images[i].ts);
+      var nexthour = -1;
+      if(i+1 < data.images.length) {
+        nexthour = get_hour(data.images[i+1].ts);
+      }
+      if(hour != nexthour) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        var hstr = sprintf('%02d:00', hour);
+        td.innerHTML(hstr);
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.innertHTML(imgstr);
+        tr.appendChild(td);
+        tbl.appendChild(tr);
+        imgstr = '';
+      }
+    }
+  }
+}
+</script>
+
+<div id='thumbnail-selector'>
+<div class="table-responsive">
+<table class="table table-condensed table-striped">
+<tr>
+<td>05:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817050001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817050501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817051001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817051501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817052001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817052501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817053001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817053501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817054002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817054502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817055001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817055501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>06:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817060001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817060501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817061001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817061501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817062002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817062502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817063001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817063501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817064001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817064501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817065001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817065501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>07:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817070002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817070501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817071001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817071501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817072001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817072501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817073001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817073501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817074001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817074501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817075001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817075501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>08:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817080002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817080501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817081001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817081501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817082001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817082501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817083001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817083501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817084001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817084501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817085001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817085502-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>09:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817090001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817090501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817091001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817091501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817092001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817092501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817093001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817093501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817094001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817094501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817095001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817095501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>10:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817100001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817100501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817101001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817101501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817102001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817102501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817103001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817103501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817104001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817104501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817105001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817105501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>11:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817110001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817110501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817111001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817111501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817112001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817112501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817113001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817113501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817114001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817114501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817115001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817115501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>12:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817120002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817120501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817121001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817121501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817122001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817122501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817123001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817123501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817124001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817124501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817125001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817125501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>13:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817130001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817130501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817131001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817131501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817132001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817132501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817133001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817133501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817134001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817134501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817135002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817135501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>14:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817140001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817140501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817141001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817141501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817142001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817142501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817143001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817143502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817144002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817144501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817145001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817145501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>15:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817150001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817150501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817151001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817151501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817152001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817152501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817153001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817153501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817154001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817154501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817155001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817155501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>16:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817160002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817160501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817161001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817161502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817162001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817162501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817163001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817163501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817164001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817164501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817165001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817165501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>17:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817170001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817170501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817171001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817171501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817172001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817172502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817173001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817173501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817174001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817174501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817175001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817175501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>18:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817180001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817180501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817181001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817181502-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817182001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817182501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817183001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817183501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817184001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817184501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817185001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817185501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>19:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817190001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817190501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817191002-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817191501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817192001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817192501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817193001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817193501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817194001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817194501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817195001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817195501-tn.jpg" />
+</td>
+</tr>
+<tr>
+<td>20:00</td>
+<td>
+<img src="/admin/img/192.168.12.32/20160817/20160817200001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817200501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817201001-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817201501-tn.jpg" />
+<img src="/admin/img/192.168.12.32/20160817/20160817202001-tn.jpg" />
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+</body>
+</html>

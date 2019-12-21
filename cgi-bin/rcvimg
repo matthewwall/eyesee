@@ -1,0 +1,105 @@
+#!/usr/bin/perl
+# Copyright 2013-2017 Matthew Wall
+# Distributed under terms of the GPLv3
+#
+# receive uploaded images
+
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use File::Basename;
+use File::Spec::Functions qw(rel2abs);
+use strict;
+
+my $path = dirname(rel2abs($0));
+require "$path/../bin/eyesee.pl";
+our $verbose;
+
+$CGI::POST_MAX = 1024 * 5000;
+
+my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
+                  ('RCVIMG_DEST_BASEDIR', '/var/eyesee/img',
+                   'RCVIMG_BASEURL', '/eyesee/img',
+                   # log configuration
+                   'RCVIMG_LOGDIR', '/var/log/eyesee',
+                   'RCVIMG_LOGFILE', 'rcvimg',
+                   # mqtt configuration
+                   'RCVIMG_MQTT_TELEMETRY_BROKER', 'localhost',
+                   'RCVIMG_MQTT_PORT', '1883',
+                   'RCVIMG_MQTT_SEND', 0,
+                  ));
+
+# format for date/time in the log messages
+my $DATE_FORMAT = "%Y.%m.%d %H:%M:%S";
+
+# where to put the log file
+my $LOGFN = "$cfg{RCVIMG_LOGDIR}/$cfg{RCVIMG_LOGFILE}";
+
+my $safe_chars = 'ea-zA-Z0-9_.-';
+my $dstdir_base = $cfg{RCVIMG_DEST_BASEDIR};
+
+my $code = '200';
+my $msg = 'OK';
+my $query = new CGI;
+my $label = $query->param('label'); # e.g., hostname
+my $name = $query->param('filename'); # e.g., YYmmddHHMMSS
+my $path = q();
+
+$label =~ tr/ /_/;
+$label =~ s/[^$safe_chars]//g;
+$label = lc $label;
+$name =~ tr/ /_/;
+$name =~ s/[^$safe_chars]//g;
+if (length($label) == 0) {
+    $code = 400;
+    $msg = "bad value for label: '$label'";
+    logmsg($msg);
+} elsif ($name !~ /^\d\d\d\d\d\d\d\d/) {
+    $code = 400;
+    $msg = "bad format for name: '$name'";
+    logmsg($msg);
+} else {
+    my ($subdir) = $name =~ /(\d\d\d\d\d\d\d\d)/;
+    `mkdir -p $dstdir_base/$label/$subdir`;
+    $path = "$label/$subdir/$name";
+    my $fn = "$dstdir_base/$path";
+    my $fh = $query->upload('thumbnail');
+    if (open(FILE, ">$fn")) {
+        binmode FILE;
+        while(<$fh>) {
+            print FILE;
+        }
+        close(FILE);
+    } else {
+        $code = 500;
+        $msg = "cannot write to $fn: $!";
+        logmsg($msg);
+    }
+}
+
+if ($cfg{RCVIMG_MQTT_SEND}) {
+    my $now = time;
+    my $url = $cfg{RCVIMG_BASEURL} . q(/) . $path;
+    my $topic = "telemetry/${label}/cam/img";
+    # must fake fail and rc since the image handler expects those
+    my $msg = "{\"ts\":$now, \"url\":\"$url\", \"fail\":0, \"rc\":0, \"code\":$code}";
+    send_mqtt($cfg{RCVIMG_MQTT_TELEMETRY_BROKER},
+              $cfg{RCVIMG_MQTT_PORT},
+              $topic, $msg);
+}
+
+print $query->header(-type=>'text/plain', -status=>"$code $msg");
+
+exit 0;
+
+
+sub logmsg {
+    my ($msg) = @_;
+    my $src = $ENV{REMOTE_ADDR};
+    my $tstr = strftime $DATE_FORMAT, localtime time;
+    if (open(LOGFILE, ">>$LOGFN")) {
+        print LOGFILE "$tstr $src $msg\n";
+        close(LOGFILE);
+    } else {
+        print STDOUT "$tstr $src $msg\n";
+    }
+}

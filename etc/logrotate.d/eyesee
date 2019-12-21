@@ -1,0 +1,28 @@
+/var/log/eyesee/*.log {
+  weekly
+  missingok
+  rotate 52
+  compress
+  delaycompress
+  notifempty
+}
+
+/var/log/eyesee/rcvimg {
+  weekly
+  missingok
+  rotate 52
+  compress
+  delaycompress
+  notifempty
+  create 644 www-data adm
+}
+
+/var/log/eyesee/info {
+  weekly
+  missingok
+  rotate 52
+  compress
+  delaycompress
+  notifempty
+  create 644 www-data adm
+}

@@ -1,0 +1,173 @@
+#!/usr/bin/perl
+# Copyright 2013-2017 Matthew Wall
+# Distributed under terms of the GPLv3
+#
+# get the img and vid information
+#
+# all timestamps are GMT
+# all displayed times are local time
+
+use Date::Parse;
+use File::Find;
+use JSON qw(to_json);;
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use Time::Local;
+use File::Basename;
+use File::Spec::Functions qw(rel2abs);
+use strict;
+
+my $path = dirname(rel2abs($0));
+require "$path/../bin/eyesee.pl";
+our $verbose;
+
+$CGI::POST_MAX = 1024 * 5000;
+
+my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
+                  ('INFO_TYPE', 'img', # img or vid
+                   # location of images and videos
+                   'INFO_IMG_BASEDIR', '/var/eyesee/img',
+                   'INFO_VID_BASEDIR', '/var/eyesee/vid',
+                   # url to images and videos
+                   'INFO_IMG_BASEURL', '/eyesee/img',
+                   'INFO_VID_BASEURL', '/eyesee/vid',
+                   # maximum age in days
+                   'INFO_MAX_AGE', 1,
+                   # log configuration
+                   'INFO_LOGDIR', '/var/log/eyesee',
+                   'INFO_LOGFILE', 'info',
+                  ));
+
+# where to put the log file
+my $LOGFN = "$cfg{INFO_LOGDIR}/$cfg{INFO_LOGFILE}";
+
+my $img_basedir = $cfg{INFO_IMG_BASEDIR};
+my $vid_basedir = $cfg{INFO_VID_BASEDIR};
+my $img_url = $cfg{INFO_IMG_BASEURL};
+my $vid_url = $cfg{INFO_VID_BASEURL};
+my $maxage = $cfg{INFO_MAX_AGE} * 24*3600;
+
+my $now = time();
+my $code = '200';
+my $msg = 'OK';
+my $query = new CGI;
+my $start = $query->param('start');
+my $end = $query->param('end');
+my $camid = $query->param('camera');
+my $type = $query->param('type');
+logmsg("args: start=$start end=$end camera=$camid type=$type");
+
+$type = $cfg{INFO_TYPE} if ! $type;
+$end = get_ts($end);
+$start = get_ts($start);
+$end = $now if ! $end;               # default to now if no end specified
+$start = $end - $maxage if ! $start;
+
+my $sstr = format_datetime($start);
+my $estr = format_datetime($end);
+logmsg("find $type from $sstr ($start) to $estr ($end)");
+
+my $basedir;
+my $url;
+my $ext;
+if ($type eq 'vid') {
+    $basedir = $vid_basedir;
+    $url = $vid_url;
+    $ext = 'avi';
+} else {
+    $basedir = $img_basedir;
+    $url = $img_url;
+    $ext = 'jpg';
+}
+$basedir .= "/$camid";
+$url .= "/$camid";
+
+# search the basedir for matching times.  split the search into separate
+# sub directories to speed up the process, using the name of each subdirectory
+# to see whether it might contain files in the time range.  this assumes a
+# directory structure with directories named by time.
+my $query_start = time();
+my @subdirs;
+my @srcs;
+my $sod = get_startofday($start);
+logmsg("scanning $basedir");
+if (opendir DH, $basedir) {
+    my @children = grep { /^[^\.]/ && -d "$basedir/$_" } readdir DH;
+    closedir DH;
+    foreach my $c (@children) {
+        my($y,$m,$d) = $c =~ /(\d\d\d\d)(\d\d)(\d\d)/;
+        if($y && $m && $d) {
+            my $ts = timelocal(0,0,0,$d,$m-1,$y);
+            if($start <= $ts && $ts <= $end) {
+                push @subdirs, "$basedir/$c";
+            } else {
+#                logmsg("skipped directory $c: outside time range");
+            }
+        } else {
+#            logmsg("skipped directory $c");
+        }
+    }
+} else {
+    logmsg("cannot read basedir $basedir: $!");
+}
+foreach my $subdir (@subdirs) {
+    logmsg("scanning $subdir");
+    find ( sub {
+        return unless -f;
+        my $fn = $File::Find::name;
+        return unless $fn =~ /\d.${ext}$/;
+        my $mtime = (stat $fn)[9];
+        my $keep = ($start <= $mtime && $mtime <= $end);
+        return unless $keep;
+        my $sname = $fn;
+        $sname =~ s/$basedir/$url/;
+        my %info = ('ts', $mtime, 'source', $sname);
+        my $tname = $fn;
+        $tname =~ s/.${ext}/-tn.jpg/;
+        if (-f "$tname") {
+            $tname =~ s/$basedir/$url/;
+            $info{'thumbnail'} = $tname;
+        }
+        push @srcs, \%info;
+           }, $subdir);
+}
+my $query_end = time();
+my $count = scalar @srcs;
+logmsg("found $count $type");
+
+my $data->{query_ts} = $now;
+$data->{query_start_ts} = $query_start + 0;
+$data->{query_end_ts} = $query_end + 0;
+$data->{start_ts} = $start;
+$data->{end_ts} = $end;
+$data->{assets} = \@srcs;
+
+print $query->header(-type=>'application/json', -status=>"$code $msg");
+print to_json($data);
+print "\n";
+
+exit 0;
+
+
+
+
+sub get_startofday() {
+    my($ts) = @_;
+    my @t = localtime($ts);
+    my $sod = timelocal(0,0,0,$t[3],$t[4],$t[5]);
+    return $sod;
+}
+
+# get a timestamp from an arbitrary date string
+sub get_ts {
+    my ($s) = @_;
+    my $ts;
+    if ($s =~ /^\d\d\d\d\d\d\d\d\d\d$/) {
+        $ts = $s + 0;
+    } elsif ($s =~ /^\d\d\d\d\d\d\d\d\d\d\d\d\d$/) {
+        $ts = floor($s / 1000);
+    } else {
+        $ts = str2time($s);
+    }
+    return $ts;
+}

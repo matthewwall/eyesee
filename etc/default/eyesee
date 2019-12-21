@@ -1,0 +1,4 @@
+# list of cameras, using IP address or resolvable hostname
+#CAMERA_LIST="10.1.43.5"
+#CAMERA_LIST="192.168.0.10 192.168.0.11"
+#CAMERA_LIST="porch driveway patio garage attic"

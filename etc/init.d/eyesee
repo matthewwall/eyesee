@@ -1,0 +1,73 @@
+#!/bin/sh
+# Copyright 2015-2017 Matthew Wall
+# startup script for running eyesee getimg in daemon mode
+
+### BEGIN INIT INFO
+# Provides:          eyesee
+# Required-Start:    $local_fs $remote_fs $ntp
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: image capture system
+# Description:       Manages the image capture system
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+GETIMG=/opt/eyesee/bin/getimg.pl
+CFG=/etc/eyesee/eyesee.cfg
+PIDDIR=/var/run/eyesee
+LOGDIR=/var/log/eyesee
+
+CAMERA_LIST=
+
+# Try to keep systemd from screwing everything up
+export SYSTEMCTL_SKIP_REDIRECT=1
+
+# bail out if application is not installed
+[ -x "$GETIMG" ] || exit 0
+
+# read the configuration
+[ -r /etc/default/eyesee ] && . /etc/default/eyesee
+
+case "$1" in
+    start)
+        # ensure that we have a place to put the process identifiers
+        if [ ! -d "$PIDDIR" ]; then
+            mkdir -p $PIDDIR
+        fi
+        # ensure that we have a place to put the log file(s)
+        if [ ! -d "$LOGDIR" ]; then
+            mkdir -p $LOGDIR
+        fi
+        echo -n "Starting getimg..."
+        for cam in $CAMERA_LIST; do
+            echo -n "$cam..."
+            $GETIMG --daemon --config $CFG --host $cam >> $LOGDIR/getimg-$cam.log 2>&1 &
+            pid=$!
+            echo $pid > $PIDDIR/$cam.pid
+        done
+        echo "done"
+        ;;
+
+    stop)
+        echo -n "Stopping getimg..."
+        for cam in $CAMERA_LIST; do
+            if [ -f $PIDDIR/$cam.pid ]; then
+                echo -n "$cam..."
+                kill `cat $PIDDIR/$cam.pid`
+                rm $PIDDIR/$cam.pid
+            fi
+        done
+        echo "done."
+        ;;
+
+     status)
+        ;;
+
+     *)
+        echo "Usage: eyesee {start|stop}"
+        exit 3
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,68 @@
+This is a set of scripts that will:
+
+- capture images from one or more cameras with TCP/IP interface
+- create videos from the images
+- display the images on a web page
+- transfer images to an image repository
+- optionally notify about image changes using MQTT
+- enforce a retention policy for images and videos
+
+
+Pre-installation
+
+Configure each camera with a user who is authorized to capture images.  This is
+typically a user with no administrative privileges.
+
+Cameras are identified by IP address or hostname.
+
+Be sure that the machine on which eyesee is running can ping each camera.
+
+
+Installation
+
+1) install the components
+  install.sh
+
+2) modify the configuration files
+  /etc/default/eyesee         - list of cameras
+  /etc/eyesee/eyesee.cfg      - parameters for each camera
+  /etc/eyesee/eyesee-cfg.js   - which cameras to display in web pages
+
+3) start the daemon
+  /etc/init.d/eyesee start
+
+4) restart the web server
+  /etc/init.d/apache2 restart
+ 
+
+Installation options
+
+Use the PREFIX and DATADIR options to specify installation and data locations:
+
+PREFIX=/opt/eyesee DATADIR=/var/eyesee install.sh
+
+To select a specific user/group identifier:
+
+EYESEE_UID=505 EYESEE_GID=505 install.sh
+
+
+Configuration option
+
+See eyesee-defaults.cfg and eyesee-defaults.js for all of the options.
+
+
+Components
+
+bin/getimg.pl - capture images from IP cameras
+bin/mkvid.pl - create timelapse from images
+bin/xfrimg.pl - transfer image to central server
+bin/reap.pl - delete images and videos
+
+cgi-bin/info - provide information about images and videos
+cgi-bin/recvimg - server-side image receiver
+
+
+Copyright and Licensing
+
+Copyright 2013-2017 Matthew Wall
+Licensed under the terms of the GPLv3
