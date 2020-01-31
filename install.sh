@@ -73,6 +73,14 @@ install_prereq() {
 }
 
 install_eyesee_files() {
+    # if the distribution is at the installation location, then do not do the
+    # file copy.
+    cwd=`pwd`
+    if [ "$cwd" = "${PREFIX}" ]; then
+        echo "no files to copy"
+        return
+    fi
+
     # install the necessary files
     echo "copy files to ${PREFIX}"
     for d in \
@@ -213,25 +221,25 @@ install_eyesee_conf() {
     if [ ! -f /etc/logrotate.d/eyesee ]; then
         echo "configure logrotate"
         cat etc/logrotate.d/eyesee | \
-            sed -e 's%/var/log/eyesee%${LOGDIR}%' > \
+            sed -e "s%/var/log/eyesee%${LOGDIR}%" > \
                 /etc/logrotate.d/eyesee
     fi
 
     if [ ! -f /etc/cron.d/eyesee ]; then
         echo "configure cron"
         cat etc/cron.d/eyesee | \
-            sed -e 's%/opt/eyesee%${PREFIX}%' \
-                -e 's%/var/eyesee%${DATADIR}%' \
-                -e 's%/var/log/eyesee%${LOGDIR}%' > \
+            sed -e "s%/opt/eyesee%${PREFIX}%" \
+                -e "s%/var/eyesee%${DATADIR}%" \
+                -e "s%/var/log/eyesee%${LOGDIR}%" > \
                 /etc/cron.d/eyesee
     fi
 
     if [ -d /etc/init.d -a ! -f /etc/init.d/eyesee ]; then
         echo "configure init"
         cat etc/init.d/eyesee | \
-            sed -e 's%/opt/eyesee%${PREFIX}%' \
-                -e 's%/var/eyesee%${DATADIR}%' \
-                -e 's%/var/log/eyesee%${LOGDIR}%' > \
+            sed -e "s%/opt/eyesee%${PREFIX}%" \
+                -e "s%/var/eyesee%${DATADIR}%" \
+                -e "s%/var/log/eyesee%${LOGDIR}%" > \
                 /etc/init.d/eyesee
         chmod 755 /etc/init.d/eyesee
     fi
@@ -239,16 +247,16 @@ install_eyesee_conf() {
     if [ -d /etc/nginx/conf.d -a ! -f /etc/nginx/conf.d/eyesee.conf ]; then
         echo "configure nginx"
         cat etc/nginx/conf.d/eyesee.conf | \
-            sed -e 's%/opt/eyesee%${PREFIX}%' \
-                -e 's%/var/eyesee%${DATADIR}%' > \
+            sed -e "s%/opt/eyesee%${PREFIX}%" \
+                -e "s%/var/eyesee%${DATADIR}%" > \
                 /etc/nginx/conf.d/eyesee.conf
     fi
     
     if [ -d /etc/apache2/conf.d -a ! -f /etc/apache2/conf.d/eyesee.conf ]; then
         echo "configure apache"
         cat etc/apache/conf.d/eyesee.conf | \
-            sed -e 's%/var/eyesee%${DATADIR}%' \
-                -e 's%/opt/eyesee%${PREFIX}%' > \
+            sed -e "s%/var/eyesee%${DATADIR}%" \
+                -e "s%/opt/eyesee%${PREFIX}%" > \
                 /etc/apache2/conf.d/eyesee.conf
     fi
 
@@ -292,8 +300,8 @@ if [ "$USER" != "root" ]; then
     exit
 fi
 
-#install_prereq
-#install_eyesee_files
-#install_eyesee_user
+install_prereq
+install_eyesee_files
+install_eyesee_user
 install_eyesee_conf
 #config_eyesee_server
