@@ -126,6 +126,7 @@ my %cameras = (
     'mobotix',           "http://$host/record/current.jpg",
 #    'mobotix',           "http://$host/cgi-bin/image.jpg",
     'hikvision',         "http://$host/Streaming/channels/1/picture",
+    'hikvision2',         "http://$host/ISAPI/Streaming/channels/101/picture",
     );
 my $img_url = q();
 foreach my $c (keys %cameras) {
