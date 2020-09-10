@@ -244,20 +244,24 @@ install_eyesee_conf() {
         chmod 755 /etc/init.d/eyesee
     fi
 
+    mkdir -p /etc/eyesee/nginx
+    cat etc/nginx/conf.d/eyesee.conf | \
+        sed -e "s%/opt/eyesee%${PREFIX}%" \
+            -e "s%/var/eyesee%${DATADIR}%" > \
+            /etc/eyesee/nginx/eyesee.conf
     if [ -d /etc/nginx/conf.d -a ! -f /etc/nginx/conf.d/eyesee.conf ]; then
         echo "configure nginx"
-        cat etc/nginx/conf.d/eyesee.conf | \
-            sed -e "s%/opt/eyesee%${PREFIX}%" \
-                -e "s%/var/eyesee%${DATADIR}%" > \
-                /etc/nginx/conf.d/eyesee.conf
+        ln -s /etc/eyesee/nginx/eyesee.conf /etc/nginx/conf.d/eyesee.conf
     fi
-    
+
+    mkdir -p /etc/eyesee/apache2
+    cat etc/apache/conf.d/eyesee.conf | \
+        sed -e "s%/var/eyesee%${DATADIR}%" \
+            -e "s%/opt/eyesee%${PREFIX}%" > \
+            /etc/eyesee/apache2/eyesee.conf
     if [ -d /etc/apache2/conf.d -a ! -f /etc/apache2/conf.d/eyesee.conf ]; then
         echo "configure apache"
-        cat etc/apache/conf.d/eyesee.conf | \
-            sed -e "s%/var/eyesee%${DATADIR}%" \
-                -e "s%/opt/eyesee%${PREFIX}%" > \
-                /etc/apache2/conf.d/eyesee.conf
+        ln -s /etc/eyesee/apache2/eyesee.conf /etc/apache2/conf.d/eyesee.conf
     fi
 
     # create the destination for images and videos
