@@ -51,6 +51,11 @@ Configuration option
 See eyesee-defaults.cfg and eyesee-defaults.js for all of the options.
 
 
+Configuration for nginx
+
+You must install and configure fastcgi.  See nginx/eyesee.conf for details.
+
+
 Components
 
 bin/getimg.pl - capture images from IP cameras
@@ -64,5 +69,5 @@ cgi-bin/recvimg - server-side image receiver
 
 Copyright and Licensing
 
-Copyright 2013-2017 Matthew Wall
+Copyright 2013-2020 Matthew Wall
 Licensed under the terms of the GPLv3
