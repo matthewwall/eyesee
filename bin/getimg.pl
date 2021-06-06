@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Copyright 2013-2017 Matthew Wall
+# Copyright 2013-2021 Matthew Wall
 # Distributed under terms of the GPLv3
 #
 # capture an image from a web camera
@@ -36,11 +36,11 @@ require "$path/eyesee.pl";
 our $verbose;
 our $doit;
 
+my $version = '0.32';
 my $daemon = 0;                     # if non-zero, run as a daemon
-
 my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
                   ('GETIMG_DAYONLY', 0,
-                   'GETIMG_WAIT', 30,
+                   'GETIMG_WAIT', 5,
                    'GETIMG_ID', q(),
                    'GETIMG_HOST', 'x.x.x.x',
                    'GETIMG_BASEDIR', '/var/eyesee/img',
@@ -48,6 +48,7 @@ my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
                    'GETIMG_USER', 'guest',
                    'GETIMG_PASS', q(),
                    'GETIMG_USE_DIGEST', 0,
+		   'GETIMG_CRED_PROTO', q(),
                    'GETIMG_DAYLIGHT_BUFFER', 45,
                    'GETIMG_LOC', q(),
                    'GETIMG_CTYPE', 'TV-IP110',
@@ -90,10 +91,41 @@ while($ARGV[0]) {
         $cfg{GETIMG_DAYONLY} = 1;
     } elsif ($arg eq '--use-digest') {
         $cfg{GETIMG_USE_DIGEST} = 1;
+    } elsif ($arg eq '--cred-proto') {
+        my $p = shift;
+	if ($p ne 'digest' && $p ne 'cgi') {
+	    print "unrecognized credentials protocol '$p'\n";
+	    exit 1;
+	}
+	$cfg{GETIMG_CRED_PROTO} = $p;
+    } elsif ($arg eq '--version') {
+	print "$version\n";
+	exit 0;
+    } elsif ($arg eq '--help') {
+        print "options include:\n";
+        print "  --verbose        # provide feedback\n";
+        print "  --debug          # test run but no action\n";
+        print "  --config FILE     # configuration file\n";
+        print "  --daemon         # run as a daemon\n";
+        print "  --daemon-wait N  # how long to wait between snaps, seconds\n";
+        print "  --host HOST      # host name/address\n";
+        print "  --loc LAT,LON    # lat,lon for calculating sunset\n";
+        print "  --odir DIR       # where to save the files\n";
+        print "  --user USERNAME  # username for getting images\n";
+        print "  --pass PASSWORD  # password for user\n";
+        print "  --cam CAM_TYPE   # camera type\n";
+        print "  --cred-proto PROTO # protocol for auth: basic, digest, cgi\n";
+        print "  --id ID          # identifier for the image source\n";
+        exit 0;
     }
 }
 
 %cfg = reduce_cfg($cfg{GETIMG_HOST}, %cfg);
+
+# backward copatibility for digest
+if ($cfg{GETIMG_USE_DIGEST} && $cfg{GETIMG_CRED_PROTO} eq q()) {
+    $cfg{GETIMG_CRED_PROTO} = 'digest';
+}
 
 # provide feedback about the configuration
 foreach my $k (sort keys %cfg) {
@@ -108,7 +140,7 @@ my $basedir = $cfg{GETIMG_BASEDIR};
 my $odir = $cfg{GETIMG_ODIR};
 my $user = $cfg{GETIMG_USER};       # username for camera access
 my $pass = $cfg{GETIMG_PASS};       # password for camera access
-my $usedigest = $cfg{GETIMG_USE_DIGEST};   # use digest for auth
+my $auth = $cfg{GETIMG_CRED_PROTO}; # how to format auth credentials
 my $buffer = $cfg{GETIMG_DAYLIGHT_BUFFER}; # time before/after sunset, minutes
 my $loc = $cfg{GETIMG_LOC};         # latitude,longitude
 my $ctype = $cfg{GETIMG_CTYPE};     # camera type
@@ -116,6 +148,7 @@ my $tmpname = $cfg{GETIMG_TMPNAME};
 my $mkthumb = $cfg{GETIMG_MAKE_THUMBNAIL};
 my $tnheight = $cfg{GETIMG_THUMBNAIL_HEIGHT};
 
+# figure out the URL based on the camera type
 my %cameras = (
     'foscam-FI8905W',    "http://$host/snapshot.cgi",
     'trendnet-TVIP110',  "http://$host/cgi/jpg/image.cgi",
@@ -126,7 +159,8 @@ my %cameras = (
     'mobotix',           "http://$host/record/current.jpg",
 #    'mobotix',           "http://$host/cgi-bin/image.jpg",
     'hikvision',         "http://$host/Streaming/channels/1/picture",
-    'hikvision2',         "http://$host/ISAPI/Streaming/channels/101/picture",
+    'hikvision2',        "http://$host/ISAPI/Streaming/channels/101/picture",
+    'reolink',           "http://$host/cgi-bin/api.cgi?cmd=Snap&channel=0",
     );
 my $img_url = q();
 foreach my $c (keys %cameras) {
@@ -211,8 +245,21 @@ do {
     }
 
     if (! $skip) {
-        my $digest = $usedigest ? '--digest' : q();
-        my ($fail, $rc, $sig) = docmd("curl -s -S -u $user:$pass $digest -w %{http_code} -o $odir/$tmpname ${img_url} > $odir/$tmpname.code");
+	my $authstr = q();
+	my $authcgi = q();
+        if ($user ne q()) {
+            if ($auth eq 'digest') {
+                $authstr = "-u $user:$pass --digest";
+            } elsif ($auth eq 'cgi') {
+                $authcgi = "&user=$user&password=$pass";
+            } else {
+                $authstr = "-u $user:$pass";
+            }
+        }
+	# -s - silent mode
+	# -S - show error even with -s
+	# -w - use output format after completion
+        my ($fail, $rc, $sig) = docmd("curl -s -S $authstr -w %{http_code} -o $odir/$tmpname '${img_url}${authcgi}' > $odir/$tmpname.code");
         my $code = `cat $odir/$tmpname.code`;
         # final filename is the timestamp
         my $ts = strftime("%Y%m%d%H%M%S", localtime($now));
