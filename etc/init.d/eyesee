@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2015-2017 Matthew Wall
+# Copyright 2015-2021 Matthew Wall
 # startup script for running eyesee getimg in daemon mode
 
 ### BEGIN INIT INFO
