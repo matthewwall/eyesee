@@ -8,8 +8,9 @@ This is a set of scripts that will:
 - enforce a retention policy for images and videos
 
 Images can be captured by running a daemon, or by crontab.  Use the daemon
-method if you need to capture more than one image per minute.  It is possible
-to capture from some cameras using a daemon, and other cameras using cron.
+method if you need to capture images more often than one image per minute.
+It is possible to capture from some cameras using a daemon, and other cameras
+using cron.
 
 Each camera is identified by its IP address.  A mapping to human-readable names
 can be specified in the javascript configuration file, or by creating symlinks
@@ -96,7 +97,7 @@ cgi-bin/recvimg - server-side image receiver
 Bugs
 
 Although the software has been working reliably for me for many years, the
-nstallation process is still rather clunky.  I have tested on debian systems
+installation process is still rather clunky.  I have tested on debian systems
 since debian7, centos7 systems, and openbsd, using a variety of cameras
 including mobotix, dlink, dahua, reolink, and hikvision.
 
