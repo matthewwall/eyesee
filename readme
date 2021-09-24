@@ -7,7 +7,20 @@ This is a set of scripts that will:
 - optionally notify about image changes using MQTT
 - enforce a retention policy for images and videos
 
+Images can be captured by running a daemon, or by crontab.  Use the daemon
+method if you need to capture more than one image per minute.  It is possible
+to capture from some cameras using a daemon, and other cameras using cron.
 
+Each camera is identified by its IP address.  A mapping to human-readable names
+can be specified in the javascript configuration file, or by creating symlinks
+in the image storage area.
+
+The web-browser-based image browser displays thumbnails of the images and/or
+videos, as well as basic play/pause controls to scan through large numbers of
+images.
+
+
+===============================================================================
 Pre-installation
 
 Configure each camera with a user who is authorized to capture images.  This is
@@ -23,6 +36,7 @@ systems you can do 'sudo a2enmod cgi'.  Or manually symlink the cgi modules in
 your system's mods-enabled folder.
 
 
+===============================================================================
 Installation
 
 1) install the components
@@ -34,39 +48,39 @@ Installation
   /etc/default/eyesee       - list of cameras for image capture using daemon
   /etc/cron.d/eyesee        - list of cron entries for image capture using cron
 
-3) restart the web server
-  /etc/init.d/apache2 restart
-
-4) test by grabbing a single image from each camera
+3) test by grabbing a single image from each camera
   su eyesee
   /opt/eyesee/bin/getimg.pl --host x.x.x.x --verbose
 
-5) start the daemon and configure to start at system boot
+optional:
+
+-) for daemon-based capturing, start the daemon and configure to start at boot
   /etc/init.d/eyesee start
   update-rc.d eyesee defaults
 
+-) (re)start the apache web server to see the image browsing pages
+  /etc/init.d/apache2 restart
 
+
+===============================================================================
 Installation options
 
 Use the PREFIX and DATADIR options to specify installation and data locations:
 
-PREFIX=/opt/eyesee DATADIR=/var/eyesee install.sh
+  PREFIX=/opt/eyesee DATADIR=/var/eyesee install.sh
 
 To select a specific user/group identifier:
 
-EYESEE_UID=505 EYESEE_GID=505 install.sh
+  EYESEE_UID=505 EYESEE_GID=505 install.sh
 
 
-Configuration option
+===============================================================================
+Configuration options
 
 See eyesee-defaults.cfg and eyesee-defaults.js for all of the options.
 
 
-Configuration for nginx
-
-You must install and configure fastcgi.  See nginx/eyesee.conf for details.
-
-
+===============================================================================
 Components
 
 bin/getimg.pl - capture images from IP cameras
@@ -78,6 +92,20 @@ cgi-bin/info - provide information about images and videos
 cgi-bin/recvimg - server-side image receiver
 
 
+===============================================================================
+Bugs
+
+Although the software has been working reliably for me for many years, the
+nstallation process is still rather clunky.  I have tested on debian systems
+since debian7, centos7 systems, and openbsd, using a variety of cameras
+including mobotix, dlink, dahua, reolink, and hikvision.
+
+File format for the generated timelapse videos is still rather crude.  The
+initial implementation worked well in web browsers from circa 2010, but not
+so well with modern phones or tablets.
+
+
+===============================================================================
 Copyright and Licensing
 
 Copyright 2013-2021 Matthew Wall
