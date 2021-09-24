@@ -13,7 +13,8 @@ Pre-installation
 Configure each camera with a user who is authorized to capture images.  This is
 typically a user with no administrative privileges.
 
-Cameras are identified by IP address or hostname.
+Cameras are identified by IP address or hostname, so be sure that each camera
+has a static IP address and/or hostname.
 
 Be sure that the machine on which eyesee is running can ping each camera.
 
@@ -24,16 +25,22 @@ Installation
   install.sh
 
 2) modify the configuration files
-  /etc/default/eyesee         - list of cameras
-  /etc/eyesee/eyesee.cfg      - parameters for each camera
-  /etc/eyesee/eyesee-cfg.js   - which cameras to display in web pages
+  /etc/eyesee/eyesee.cfg    - parameters for each camera
+  /etc/eyesee/eyesee.js     - which cameras to display in web pages
+  /etc/default/eyesee       - list of cameras for image capture using daemon
+  /etc/cron.d/eyesee        - list of cron entries for image capture using cron
 
-3) start the daemon
-  /etc/init.d/eyesee start
-
-4) restart the web server
+3) restart the web server
   /etc/init.d/apache2 restart
- 
+
+4) test by grabbing a single image from each camera
+  su eyesee
+  /opt/eyesee/bin/getimg.pl --host x.x.x.x --verbose
+
+5) start the daemon and configure to start at system boot
+  /etc/init.d/eyesee start
+  update-rc.d eyesee defaults
+
 
 Installation options
 
@@ -69,5 +76,5 @@ cgi-bin/recvimg - server-side image receiver
 
 Copyright and Licensing
 
-Copyright 2013-2020 Matthew Wall
+Copyright 2013-2021 Matthew Wall
 Licensed under the terms of the GPLv3

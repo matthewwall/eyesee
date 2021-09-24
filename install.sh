@@ -1,6 +1,18 @@
 #!/bin/bash
-
-# this expects the /var partition to have sufficient space for images and video
+#
+# Install the 'eyesee' image capture system.  This expects the /var partition
+# to have sufficient space for images and video.  It uses the following
+# configuration:
+#
+# PREFIX    /opt/eyesee
+# DATADIR   /var/eyesee
+# CFGDIR    /etc/eyesee
+# LOGDIR    /var/log/eyesee
+#
+# The system runs as the unpriviledged user 'eyesee'.  If this user does not
+# exist, this installer will create the user.  If you specify a UID/GID, then
+# this installer will use the specified UID/GID for the account.  Otherwise it
+# will use the next available system UID/GID, with no aging information.
 
 # set default values
 [ -z "$PREFIX" ] && PREFIX=/opt/eyesee
@@ -8,6 +20,7 @@
 [ -z "$CFGDIR" ] && CFGDIR=/etc/eyesee
 [ -z "$LOGDIR" ] && LOGDIR=/var/log/eyesee
 [ -z "$EYESEE_LOGADM" ] && EYESEE_LOGADM=adm
+[ -z "$WWW_USER" ] && WWW_USER=www-data
 
 # if there is a UID specified, then use it
 [ ! -z "$EYESEE_UID" -a -z "$EYESEE_GID" ] && EYESEE_GID=$EYESEE_UID
@@ -17,6 +30,9 @@
 
 
 ts=`date +"%Y%m%d%H%M%S"`
+
+install_log=/var/tmp/eyesee-install-${ts}.log
+defaults_file=/etc/default/eyesee
 
 mk_archive() {
     d=$1
@@ -35,24 +51,24 @@ mk_symlink() {
 
 install_prereq() {
     # for capturing images and pushing to server
-    apt-get -q -y install curl
+    apt-get -q -y install curl >> $install_log 2>&1
 
     # for creating thumbnails
-    apt-get -q -y install imagemagick
+    apt-get -q -y install imagemagick >> $install_log 2>&1
 
     # for captures only during daylight
-    apt-get -q -y install libdatetime-event-sunrise-perl
-    apt-get -q -y install libdatetime-format-dateparse-perl
+    apt-get -q -y install libdatetime-event-sunrise-perl >> $install_log 2>&1
+    apt-get -q -y install libdatetime-format-dateparse-perl >> $install_log 2>&1
 
     # for the info cgi install json
-    apt-get -q -y install libjson-perl
+    apt-get -q -y install libjson-perl >> $install_log 2>&1
 
     # for encoding to video
-    apt-get -q -y install mencoder ffmpeg
+    apt-get -q -y install mencoder ffmpeg >> $install_log 2>&1
 
     # debian older than 9 (8?) needed libav-tools
-#    apt-get -q -y install mencoder libav-tools ffmpeg
-    
+#    apt-get -q -y install mencoder libav-tools ffmpeg 2>&1
+
     # alternative ffmpeg for encoding to video
 #    echo "deb http://www.deb-multimedia.org wheezy main non-free" > /etc/apt/sources.list.d/www.deb-multimedia.org.list
 #    apt-get update
@@ -73,8 +89,8 @@ install_prereq() {
 }
 
 install_eyesee_files() {
-    # if the distribution is at the installation location, then do not do the
-    # file copy.
+    # if the distribution is at the installation location, then we are running
+    # from the source tree, so do not copy the code to the install location.
     cwd=`pwd`
     if [ "$cwd" = "${PREFIX}" ]; then
         echo "no files to copy"
@@ -183,7 +199,7 @@ install_eyesee_user() {
             useradd --uid $EYESEE_UID --gid $EYESEE_GID eyesee
         else
             echo "create user eyesee"
-            useradd eyesee
+            useradd --system eyesee
         fi
     else
         echo "user eyesee already exists"
@@ -204,12 +220,21 @@ install_eyesee_conf() {
     mk_archive ${CFGDIR}/eyesee.js
     cp etc/eyesee.js.tmpl ${CFGDIR}/eyesee.js
 
-    echo "ensure symlink for the web config"
-    mk_symlink ${CFGDIR}/eyesee.js ${PREFIX}/html/eyesee.js
+    if [ -d ${PREFIX}/html ]; then
+        echo "ensure symlink for the web config"
+        mk_symlink ${CFGDIR}/eyesee.js ${PREFIX}/html/eyesee.js
+    fi
 
+    echo "configure the defaults file"
+    mk_archive $defaults_file
+    echo "insert paths into defaults file"
+    echo "# parameters for eyesee"
+    echo "GETIMG=${PREFIX}/bin/getimg.pl" >> $defaults_file
+    echo "CFG=${CFGDIR}/eyesee.cfg" >> $defaults_file
+    echo "LOGDIR=${LOGDIR}" >> $defaults_file
     echo "copy template for list of cameras"
-    mk_archive /etc/default/eyesee
-    cp etc/default/eyesee /etc/default
+    echo "" >> $defaults_file
+    cat etc/default/eyesee >> $defaults_file
 
     if [ ! -d ${LOGDIR} ]; then
         echo "configure log directory"
@@ -236,11 +261,7 @@ install_eyesee_conf() {
 
     if [ -d /etc/init.d -a ! -f /etc/init.d/eyesee ]; then
         echo "configure init"
-        cat etc/init.d/eyesee | \
-            sed -e "s%/opt/eyesee%${PREFIX}%" \
-                -e "s%/var/eyesee%${DATADIR}%" \
-                -e "s%/var/log/eyesee%${LOGDIR}%" > \
-                /etc/init.d/eyesee
+        cp etc/init.d/eyesee /etc/init.d/eyesee
         chmod 755 /etc/init.d/eyesee
     fi
 
@@ -249,6 +270,10 @@ install_eyesee_conf() {
         sed -e "s%/opt/eyesee%${PREFIX}%" \
             -e "s%/var/eyesee%${DATADIR}%" > \
             /etc/eyesee/nginx/eyesee.conf
+    cat etc/nginx/conf.d/eyesee-sub.conf | \
+        sed -e "s%/opt/eyesee%${PREFIX}%" \
+            -e "s%/var/eyesee%${DATADIR}%" > \
+            /etc/eyesee/nginx/eyesee-sub.conf
     if [ -d /etc/nginx/conf.d -a ! -f /etc/nginx/conf.d/eyesee.conf ]; then
         echo "configure nginx"
         ln -s /etc/eyesee/nginx/eyesee.conf /etc/nginx/conf.d/eyesee.conf
@@ -279,7 +304,9 @@ install_eyesee_conf() {
 }
 
 
-# images are received to /var/eyesee/img/<id>/
+# ensure that the local storage is configured properly for images and video.
+#   images are received to /var/eyesee/img/<id>/
+#   videos are placed in /var/eyesee/vid/<id>/
 config_eyesee_server() {
     # install the cgi script
     ln -s /opt/eyesee/cgi-bin/rcvimg ${cgidir}
@@ -289,14 +316,18 @@ config_eyesee_server() {
     mkdir -p ${DATADIR}/img
     mkdir -p ${DATADIR}/vid
 
+    # data directories are owned by the eyesee user
+    chown -R ${DATADIR} eyesee
+
     # let web server write to image and video directories
     chmod 775 ${DATADIR}/img
     chmod 775 ${DATADIR}/vid
-    chgrp www-data ${DATADIR}/img
-    chgrp www-data ${DATADIR}/vid
+    chgrp ${WWW_USER} ${DATADIR}/img
+    chgrp ${WWW_USER} ${DATADIR}/vid
 
     # let web server owner write to log directory
-    chown www-data ${LOGDIR}
+    chmod 775 ${LOGDIR}
+    chgrp ${WWW_USER} ${LOGDIR}
 }
 
 if [ "$USER" != "root" ]; then
@@ -308,4 +339,14 @@ install_prereq
 install_eyesee_files
 install_eyesee_user
 install_eyesee_conf
-#config_eyesee_server
+config_eyesee_server
+
+echo ""
+echo "To complete the installation, add your camera IP addresses and other"
+echo "camera paramters to the appropriate configuration files:"
+echo ""
+echo "  /etc/eyesee/eyesee.cfg   - tell the image capture about the cameras"
+echo "  /etc/eyesee/eyesee.js    - tell the web interface about the cameras"
+echo "  /etc/default/eyesee      - if you want to run getimg as a daemon"
+echo "  /etc/cron.d/eyesee       - if you want to run getimg using cron""
+echo ""
