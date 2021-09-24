@@ -18,6 +18,10 @@ has a static IP address and/or hostname.
 
 Be sure that the machine on which eyesee is running can ping each camera.
 
+Be sure that apache2 is installed, and cgi is enabled.  For example, on debian
+systems you can do 'sudo a2enmod cgi'.  Or manually symlink the cgi modules in
+your system's mods-enabled folder.
+
 
 Installation
 
