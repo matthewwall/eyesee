@@ -8,4 +8,4 @@
 #*/5 * * * * eyesee /opt/eyesee/bin/xfrimg.pl >> /var/log/eyesee/xfrimg.log 2>&1
 
 # delete old images and videos
-45 23 * * * eyesee /opt/eyesee/bin/reaper.pl >> /var/log/eyesee/reaper.log 2>&1
+#45 23 * * * eyesee /opt/eyesee/bin/reaper.pl >> /var/log/eyesee/reaper.log 2>&1
