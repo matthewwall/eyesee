@@ -36,7 +36,7 @@ require "$path/eyesee.pl";
 our $verbose;
 our $doit;
 
-my $version = '0.32';
+my $version = '0.33';
 my $daemon = 0;                     # if non-zero, run as a daemon
 my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
                   ('GETIMG_DAYONLY', 0,
@@ -128,8 +128,10 @@ if ($cfg{GETIMG_USE_DIGEST} && $cfg{GETIMG_CRED_PROTO} eq q()) {
 }
 
 # provide feedback about the configuration
+# if running as a daemon, always emit this information
+logmsg("starting getimg daemon (pid=$$)", 1) if $daemon;
 foreach my $k (sort keys %cfg) {
-    logmsg("$k=$cfg{$k}");
+    logmsg("$k=$cfg{$k}", $daemon);
 }
 
 my $dayonly = $cfg{GETIMG_DAYONLY}; # take picture regardless of sunrise/sunset
@@ -305,5 +307,7 @@ do {
         sleep($wait);
     }
 } while($daemon);
+
+logmsg("stopping getimg daemon (pid=$$)", 1) if $daemon;
 
 exit 0;
