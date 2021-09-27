@@ -50,9 +50,9 @@ sub errmsg {
 
 
 sub logmsg {
-    my ($msg) = @_;
+    my ($msg, $override) = @_;
     my $tstr = strftime $DATE_FORMAT, localtime time;
-    print "$tstr $msg\n" if $verbose;
+    print "$tstr $msg\n" if $verbose || $override;
 }
 
 
