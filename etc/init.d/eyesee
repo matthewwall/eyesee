@@ -61,10 +61,14 @@ case "$1" in
         echo "done."
         ;;
 
-     status)
+    restart)
+        $0 stop && sleep 2 && $0 start
         ;;
 
-     *)
+    status)
+        ;;
+
+    *)
         echo "Usage: eyesee {start|stop}"
         exit 3
         ;;

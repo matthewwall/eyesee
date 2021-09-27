@@ -9,8 +9,7 @@
 # otherwise eyesee will continue to append to files that have been rotated.
 #  sharedscripts
 #  postrotate
-#    /etc/init.d/eyesee stop
-#    /etc/init.d/eyesee start
+#    /etc/init.d/eyesee restart
 #  endscript
 }
 
