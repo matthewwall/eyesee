@@ -7,6 +7,7 @@
 # PREFIX    /opt/eyesee
 # DATADIR   /var/eyesee
 # CFGDIR    /etc/eyesee
+# CGIDIR    /var/www/cgi-bin
 # LOGDIR    /var/log/eyesee
 #
 # The system runs as the unpriviledged user 'eyesee'.  If this user does not
@@ -50,20 +51,27 @@ mk_symlink() {
 
 
 install_prereq() {
+    echo "install pre-requisites"
+
     # for capturing images and pushing to server
+    echo "  curl"
     apt-get -q -y install curl >> $install_log 2>&1
 
     # for creating thumbnails
+    echo "  imagemagick"
     apt-get -q -y install imagemagick >> $install_log 2>&1
 
     # for captures only during daylight
+    echo "  libdatetime"
     apt-get -q -y install libdatetime-event-sunrise-perl >> $install_log 2>&1
     apt-get -q -y install libdatetime-format-dateparse-perl >> $install_log 2>&1
 
     # for the info cgi install json
+    echo "  libjson-perl"
     apt-get -q -y install libjson-perl >> $install_log 2>&1
 
     # for encoding to video
+    echo "  mencoder ffmpeg"
     apt-get -q -y install mencoder ffmpeg >> $install_log 2>&1
 
     # debian older than 9 (8?) needed libav-tools
@@ -228,7 +236,7 @@ install_eyesee_conf() {
     echo "configure the defaults file"
     mk_archive $defaults_file
     echo "insert paths into defaults file"
-    echo "# parameters for eyesee"
+    echo "# parameters for eyesee" >> $defaults_file
     echo "GETIMG=${PREFIX}/bin/getimg.pl" >> $defaults_file
     echo "CFG=${CFGDIR}/eyesee.cfg" >> $defaults_file
     echo "LOGDIR=${LOGDIR}" >> $defaults_file
@@ -276,7 +284,7 @@ install_eyesee_conf() {
             /etc/eyesee/nginx/eyesee-sub.conf
     if [ -d /etc/nginx/conf.d -a ! -f /etc/nginx/conf.d/eyesee.conf ]; then
         echo "configure nginx"
-        ln -s /etc/eyesee/nginx/eyesee.conf /etc/nginx/conf.d/eyesee.conf
+        mk_symlink /etc/eyesee/nginx/eyesee.conf /etc/nginx/conf.d/eyesee.conf
     fi
 
     mkdir -p /etc/eyesee/apache2
@@ -286,7 +294,7 @@ install_eyesee_conf() {
             /etc/eyesee/apache2/eyesee.conf
     if [ -d /etc/apache2/conf.d -a ! -f /etc/apache2/conf.d/eyesee.conf ]; then
         echo "configure apache"
-        ln -s /etc/eyesee/apache2/eyesee.conf /etc/apache2/conf.d/eyesee.conf
+        mk_symlink /etc/eyesee/apache2/eyesee.conf /etc/apache2/conf.d/eyesee.conf
     fi
 
     # create the destination for images and videos
@@ -309,7 +317,14 @@ install_eyesee_conf() {
 #   videos are placed in /var/eyesee/vid/<id>/
 config_eyesee_server() {
     # install the cgi script
-    ln -s /opt/eyesee/cgi-bin/rcvimg ${cgidir}
+    if [ -d ${CGIDIR} ]; then
+        if [ ! -f ${CGIDIR}/info ]; then
+            mk_symlink /opt/eyesee/cgi-bin/info ${CGIDIR}/info
+        fi
+        if [ ! -f ${CGIDIR}/rcvimg ]; then
+            mk_symlink /opt/eyesee/cgi-bin/rcvimg ${CGIDIR}/rcvimg
+        fi
+    fi
 
     # ensure that we have a place to put images and video
     mkdir -p ${DATADIR}
@@ -317,7 +332,7 @@ config_eyesee_server() {
     mkdir -p ${DATADIR}/vid
 
     # data directories are owned by the eyesee user
-    chown -R ${DATADIR} eyesee
+    chown -R eyesee ${DATADIR}
 
     # let web server write to image and video directories
     chmod 775 ${DATADIR}/img
@@ -348,5 +363,5 @@ echo ""
 echo "  /etc/eyesee/eyesee.cfg   - tell the image capture about the cameras"
 echo "  /etc/eyesee/eyesee.js    - tell the web interface about the cameras"
 echo "  /etc/default/eyesee      - if you want to run getimg as a daemon"
-echo "  /etc/cron.d/eyesee       - if you want to run getimg using cron""
+echo "  /etc/cron.d/eyesee       - if you want to run getimg using cron"
 echo ""
