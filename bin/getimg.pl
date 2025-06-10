@@ -1,31 +1,37 @@
 #!/usr/bin/perl
-# Copyright 2013-2021 Matthew Wall
+# Copyright 2013-2025 Matthew Wall
 # Distributed under terms of the GPLv3
 #
 # capture an image from a web camera
-#
-# one picture every 5 minutes at 30K per picture
-#    288 images per day
-# 105120 images per year
-# 3.1GB storage for one year
-#
-# one picture every 2 seconds at 55kB per image
-#   2.5GB per day
-#    70GB per month
-#
-# one picture every 5 minutes at 10K to 15K per image
-#      3K per day
-#    100K per month
-#
-# take pictures only when sun is up - 45 minutes before sunrise and 45 minutes
-# after sunset.
-#
-# in daemon mode, run continuously.
+# - take pictures only when sun is up - 45 minutes before/after sunrise
+# - run continuously when in daemon
 #
 # images will be saved to the following directory structure:
 #   /var/eyesee/img/
 #   /var/eyesee/img/YYYYmmdd/YYYYmmddHHMMSS.jpg
 #   /var/eyesee/img/YYYYmmdd/YYYYmmddHHMMSS.tn.jpg
+#
+# image sizes
+#    VGA   3MP   5MP   8MP
+#    30K  280K 1400K 2500K
+#
+# one picture every 5 minutes at various image sizes
+#        288 images per day
+#      8,640 images per month
+#    105,120 images per year
+#                    VGA   3MP   5MP
+# per day            12M   80M  404M
+# per month         260M  2.4G   12G
+# per year          3.2G   29G  148G
+#
+# one picture every second at various image sizes
+#     86,400 images per day
+#  2,592,000 images per month
+# 31,536,000 images per year
+#                    VGA   3MP   5MP
+# per day           2.6G 24.2G  121G
+# per month          78G  726G  3.6T
+# per year          946G  8.8T 44.2T
 
 use File::Basename;
 use File::Spec::Functions qw(rel2abs);
@@ -36,7 +42,7 @@ require "$path/eyesee.pl";
 our $verbose;
 our $doit;
 
-my $version = '0.33';
+my $version = '0.34';
 my $daemon = 0;                     # if non-zero, run as a daemon
 my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
                   ('GETIMG_DAYONLY', 0,
@@ -49,6 +55,7 @@ my %cfg = get_cfg('/etc/eyesee/eyesee.cfg',
                    'GETIMG_PASS', q(),
                    'GETIMG_USE_DIGEST', 0,
 		   'GETIMG_CRED_PROTO', q(),
+                   'GETIMG_USE_HTTPS', 0,
                    'GETIMG_DAYLIGHT_BUFFER', 45,
                    'GETIMG_LOC', q(),
                    'GETIMG_CTYPE', 'TV-IP110',
@@ -98,6 +105,8 @@ while($ARGV[0]) {
 	    exit 1;
 	}
 	$cfg{GETIMG_CRED_PROTO} = $p;
+    } elsif ($arg eq '--use-https') {
+        $cfg{GETIMG_USE_HTTPS} = 1;
     } elsif ($arg eq '--version') {
 	print "$version\n";
 	exit 0;
@@ -143,6 +152,7 @@ my $odir = $cfg{GETIMG_ODIR};
 my $user = $cfg{GETIMG_USER};       # username for camera access
 my $pass = $cfg{GETIMG_PASS};       # password for camera access
 my $auth = $cfg{GETIMG_CRED_PROTO}; # how to format auth credentials
+my $use_https = $cfg{GETIMG_USE_HTTPS};
 my $buffer = $cfg{GETIMG_DAYLIGHT_BUFFER}; # time before/after sunset, minutes
 my $loc = $cfg{GETIMG_LOC};         # latitude,longitude
 my $ctype = $cfg{GETIMG_CTYPE};     # camera type
@@ -150,19 +160,25 @@ my $tmpname = $cfg{GETIMG_TMPNAME};
 my $mkthumb = $cfg{GETIMG_MAKE_THUMBNAIL};
 my $tnheight = $cfg{GETIMG_THUMBNAIL_HEIGHT};
 
+my $ignore_cert = 1;
+my $http_proto = 'http';
+if ($use_https) {
+    $http_proto = 'https';
+}
+
 # figure out the URL based on the camera type
 my %cameras = (
-    'foscam-FI8905W',    "http://$host/snapshot.cgi",
-    'trendnet-TVIP110',  "http://$host/cgi/jpg/image.cgi",
-    'dlink-DCS900',      "http://$host/image.jpg",
-    'dlink-DCS932',      "http://$host/image/jpeg.cgi",
-    'dahua-HFW4300',     "http://$host:9989/",
-    'dahua-HFW1320',     "http://$host/cgi-bin/snapshot.cgi",
-    'mobotix',           "http://$host/record/current.jpg",
-#    'mobotix',           "http://$host/cgi-bin/image.jpg",
-    'hikvision',         "http://$host/Streaming/channels/1/picture",
-    'hikvision2',        "http://$host/ISAPI/Streaming/channels/101/picture",
-    'reolink',           "http://$host/cgi-bin/api.cgi?cmd=Snap&channel=0",
+    'foscam-FI8905W',    "${http_proto}://$host/snapshot.cgi",
+    'trendnet-TVIP110',  "${http_proto}://$host/cgi/jpg/image.cgi",
+    'dlink-DCS900',      "${http_proto}://$host/image.jpg",
+    'dlink-DCS932',      "${http_proto}://$host/image/jpeg.cgi",
+    'dahua-HFW4300',     "${http_proto}://$host:9989/",
+    'dahua-HFW1320',     "${http_proto}://$host/cgi-bin/snapshot.cgi",
+    'mobotix',           "${http_proto}://$host/record/current.jpg",
+#    'mobotix',           "${http_proto}://$host/cgi-bin/image.jpg",
+    'hikvision',         "${http_proto}://$host/Streaming/channels/1/picture",
+    'hikvision2',        "${http_proto}://$host/ISAPI/Streaming/channels/101/picture",
+    'reolink',           "${http_proto}://$host/cgi-bin/api.cgi?cmd=Snap&channel=0",
     );
 my $img_url = q();
 foreach my $c (keys %cameras) {
@@ -261,7 +277,8 @@ do {
 	# -s - silent mode
 	# -S - show error even with -s
 	# -w - use output format after completion
-        my ($fail, $rc, $sig) = docmd("curl -s -S $authstr -w %{http_code} -o $odir/$tmpname '${img_url}${authcgi}' > $odir/$tmpname.code");
+        my $insecure = $ignore_cert ? '--insecure' : '';
+        my ($fail, $rc, $sig) = docmd("curl -s $insecure -S $authstr -w %{http_code} -o $odir/$tmpname '${img_url}${authcgi}' > $odir/$tmpname.code");
         my $code = `cat $odir/$tmpname.code`;
         # final filename is the timestamp
         my $ts = strftime("%Y%m%d%H%M%S", localtime($now));
